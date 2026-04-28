@@ -1,0 +1,98 @@
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+#include <DHT.h>
+
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+
+#define OLED_RESET -1
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
+#define DHTPIN 2
+#define DHTTYPE DHT11
+
+#define RED_LED 12
+#define GREEN_LED 13
+
+DHT dht(DHTPIN, DHTTYPE);
+
+float previousTemp = 0;
+
+void setup() {
+  Serial.begin(115200);
+
+  pinMode(RED_LED, OUTPUT);
+  pinMode(GREEN_LED, OUTPUT);
+
+  dht.begin();
+
+  // I2C start (SDA = D2, SCL = D1)
+  Wire.begin(4, 5);
+
+  // OLED start
+  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+    Serial.println("OLED not found");
+    while (true);
+  }
+
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+
+  display.setCursor(0, 10);
+  display.println("Starting...");
+  display.display();
+
+  delay(2000);
+}
+
+void loop() {
+  float humidity = dht.readHumidity();
+  float temperature = dht.readTemperature();
+
+  if (isnan(temperature) || isnan(humidity)) {
+    Serial.println("DHT error");
+    return;
+  }
+
+  // SERIAL OUTPUT
+  Serial.print("Temp: ");
+  Serial.print(temperature);
+  Serial.print(" C  Humidity: ");
+  Serial.println(humidity);
+
+  // OLED DISPLAY
+  display.clearDisplay();
+
+  display.setTextSize(2);
+  display.setCursor(0, 0);
+  display.print("T: ");
+  display.print(temperature);
+  display.println("C");
+
+  display.setCursor(0, 30);
+  display.print("H: ");
+  display.print(humidity);
+  display.println("%");
+
+  display.display();
+
+  // LED LOGIC
+  if (temperature > previousTemp) {
+    digitalWrite(RED_LED, HIGH);
+    digitalWrite(GREEN_LED, LOW);
+    delay(100);
+    digitalWrite(RED_LED, LOW);
+  }
+  else if (temperature < previousTemp) {
+    digitalWrite(GREEN_LED, HIGH);
+    digitalWrite(RED_LED, LOW);
+    delay(100);
+    digitalWrite(GREEN_LED, LOW);
+  }
+
+  previousTemp = temperature;
+
+  delay(2000);
+}
