@@ -45,8 +45,8 @@ const char* WIFI_SSID     = "Manet Hostel@103";
 const char* WIFI_PASSWORD = "MitHostel@103";
 
 // ── Telegram ─────────────────────────────────────────────
-#define BOT_TOKEN  "7696786747:AAGcho9VTAvZiotkCT3tj86VvyYBuytFsBk"
-#define CHAT_ID    "5392399263"
+#define BOT_TOKEN  "7696FsBk"
+#define CHAT_ID    "53"
 WiFiClientSecure securedClient;
 UniversalTelegramBot bot(BOT_TOKEN, securedClient);
 
